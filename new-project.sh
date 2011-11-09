@@ -31,6 +31,7 @@ echo Cloning braindump
 hg clone http://hg.mozilla.org/build/braindump
 
 VENV_PY=$PWD/bin/$(basename $PY)
+BUILDBOT=$PWD/bin/buildbot
 echo Running python scripts using "$VENV_PY"
 echo Installing Twisted
 (cd twisted && $VENV_PY setup.py install)
@@ -78,11 +79,17 @@ cat > master.json << EOF
 ]
 EOF
 
-ln -s ../Makefile.new-project Makefile
+cat > Makefile << EOF
+checkconfig-all:
+	(cd build-master && $BUILDBOT checkconfig)
+	(cd try-master && $BUILDBOT checkconfig)
+	(cd test-master && $BUILDBOT checkconfig)
+
+EOF
 
 for i in build try "test" ; do
 	echo "Creating $i-master"
-    (cd buildbot-configs && $VENV_PY setup-master.py -b $(dirname $VENV_PY)/buildbot -j ../master.json ../$i-master $i-master)
+    (cd buildbot-configs && $VENV_PY setup-master.py -b $BUILDBOT -j ../master.json ../$i-master $i-master)
 	(cd $i-master && ln -s ../buildbot-configs/Makefile.master Makefile && ln -s . master)
 	(cd $i-master && rm -f master.cfg)
 done
