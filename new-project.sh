@@ -94,6 +94,7 @@ for i in build try "test" ; do
 	(cd $i-master && rm -f master.cfg)
 done
 
+# patch to add -u flag to setup-master.py to avoid having to do below should awaiting review
 for i in build try ; do
 	(cd $i-master && ln -s ../buildbot-configs/mozilla/universal_master_sqlite.cfg master.cfg)
 done
