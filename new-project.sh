@@ -30,13 +30,14 @@ done
 echo Cloning braindump
 hg clone http://hg.mozilla.org/build/braindump
 
-source bin/activate
+VENV_PY=$PWD/bin/$(basename $PY)
+echo Running python scripts using "$VENV_PY"
 echo Installing Twisted
-(cd twisted && $PY setup.py install)
+(cd twisted && $VENV_PY setup.py install)
 echo Installing Buildbot Master
-(cd buildbot/master && $PY setup.py install)
+(cd buildbot/master && $VENV_PY setup.py install)
 echo Installing Buildbot Slave
-(cd buildbot/slave && $PY setup.py install)
+(cd buildbot/slave && $VENV_PY setup.py install)
 
 #configure buildbotcustom to be in the path for virtualenv
 pwd > lib/$PY/site-packages/buildbotcustom.pth
@@ -81,7 +82,7 @@ ln -s ../Makefile.new-project Makefile
 
 for i in build try "test" ; do
 	echo "Creating $i-master"
-	(cd buildbot-configs && $PY setup-master.py -j ../master.json ../$i-master $i-master)
+    (cd buildbot-configs && $VENV_PY setup-master.py -b $(dirname $VENV_PY)/buildbot -j ../master.json ../$i-master $i-master)
 	(cd $i-master && ln -s ../buildbot-configs/Makefile.master Makefile && ln -s . master)
 	(cd $i-master && rm -f master.cfg)
 done
